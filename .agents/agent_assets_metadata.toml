@@ -1,0 +1,44 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "p4ovKTMicfLTARa1Dv5VN"
+uri = "file://artifacts/mango-shop/public/images/hero-orchard.png"
+type = "image"
+title = "Sun-drenched mango orchard hero"
+
+[[generated]]
+id = "GwKws0m2Qc034ki8cjPHd"
+uri = "file://artifacts/mango-shop/public/images/alphonso.png"
+type = "image"
+title = "Perfect Alphonso mango"
+
+[[generated]]
+id = "TCDdQ8CjsYrT1-LlVy3t6"
+uri = "file://artifacts/mango-shop/public/images/alphonso-sliced.png"
+type = "image"
+title = "Sliced Alphonso mango cubes"
+
+[[generated]]
+id = "jkjXDrwZwsqPpuB0RKTdC"
+uri = "file://artifacts/mango-shop/public/images/banganapalli.png"
+type = "image"
+title = "Banganapalli mango"
+
+[[generated]]
+id = "mIh3r61F1YV3VdGX1LH09"
+uri = "file://artifacts/mango-shop/public/images/kesar.png"
+type = "image"
+title = "Kesar mango"
+
+[[generated]]
+id = "KeOu6VLxBzS1grsmOnxp5"
+uri = "file://artifacts/mango-shop/public/images/organic-box.png"
+type = "image"
+title = "Rustic box of mixed mangoes"
+
+[[generated]]
+id = "Ly2KJ0nGjRM3DXMp7OGKZ"
+uri = "file://artifacts/mango-shop/public/images/packaging.png"
+type = "image"
+title = "Premium mango delivery box"

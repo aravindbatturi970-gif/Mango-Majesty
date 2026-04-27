@@ -3,20 +3,25 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Aamras — Premium Mango Shop API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: products
+  - name: categories
+  - name: reviews
+  - name: cart
+  - name: orders
+  - name: subscriptions
+  - name: stats
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +29,297 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List all mango products
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+            description: Category slug filter
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/best-sellers:
+    get:
+      operationId: listBestSellers
+      tags: [products]
+      summary: Top best-selling mangoes
+      responses:
+        "200":
+          description: List of best sellers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get product by id
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Product detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+
+  /products/{id}/recommendations:
+    get:
+      operationId: getProductRecommendations
+      tags: [products]
+      summary: AI-style "you may also like" recommendations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Recommended products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /categories:
+    get:
+      operationId: listCategories
+      tags: [categories]
+      summary: List mango categories
+      responses:
+        "200":
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+
+  /reviews:
+    get:
+      operationId: listReviews
+      tags: [reviews]
+      summary: Customer testimonials
+      parameters:
+        - name: productId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Customer reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+
+  /cart:
+    get:
+      operationId: getCart
+      tags: [cart]
+      summary: Get current cart
+      parameters:
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Cart with items
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/items:
+    post:
+      operationId: addCartItem
+      tags: [cart]
+      summary: Add item to cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddCartItemBody"
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /cart/items/{itemId}:
+    patch:
+      operationId: updateCartItem
+      tags: [cart]
+      summary: Update item quantity
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCartItemBody"
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+    delete:
+      operationId: removeCartItem
+      tags: [cart]
+      summary: Remove item from cart
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sessionId
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated cart
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Place an order (one-page checkout)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderBody"
+      responses:
+        "201":
+          description: Order created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [orders]
+      summary: Get order confirmation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /subscriptions/plans:
+    get:
+      operationId: listSubscriptionPlans
+      tags: [subscriptions]
+      summary: List weekly mango box plans
+      responses:
+        "200":
+          description: Subscription plans
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SubscriptionPlan"
+
+  /subscriptions:
+    post:
+      operationId: createSubscription
+      tags: [subscriptions]
+      summary: Subscribe to a weekly mango box
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSubscriptionBody"
+      responses:
+        "201":
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+
+  /stats/summary:
+    get:
+      operationId: getStatsSummary
+      tags: [stats]
+      summary: Homepage stats (varieties, orders today, happy customers)
+      responses:
+        "200":
+          description: Summary stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StatsSummary"
+
 components:
   schemas:
     HealthStatus:
@@ -31,6 +327,362 @@ components:
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        emoji:
+          type: string
+      required: [id, slug, name, description]
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        name:
+          type: string
+        variety:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        unit:
+          type: string
+          description: e.g. "per box (3kg)"
+        imageUrl:
+          type: string
+        gallery:
+          type: array
+          items:
+            type: string
+        origin:
+          type: string
+        sweetness:
+          type: integer
+          minimum: 1
+          maximum: 10
+        rating:
+          type: number
+        reviewCount:
+          type: integer
+        stock:
+          type: integer
+        deliveryEtaHours:
+          type: integer
+        badge:
+          type: string
+          nullable: true
+        categorySlug:
+          type: string
+        isBestSeller:
+          type: boolean
+        isOrganic:
+          type: boolean
+      required:
+        - id
+        - slug
+        - name
+        - variety
+        - tagline
+        - description
+        - price
+        - unit
+        - imageUrl
+        - origin
+        - sweetness
+        - rating
+        - reviewCount
+        - stock
+        - deliveryEtaHours
+        - categorySlug
+        - isBestSeller
+        - isOrganic
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+          nullable: true
+        authorName:
+          type: string
+        authorLocation:
+          type: string
+        avatarUrl:
+          type: string
+        rating:
+          type: integer
+        title:
+          type: string
+        body:
+          type: string
+        createdAt:
+          type: string
+      required: [id, authorName, authorLocation, avatarUrl, rating, title, body, createdAt]
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+        product:
+          $ref: "#/components/schemas/Product"
+        quantity:
+          type: integer
+        lineTotal:
+          type: number
+      required: [id, productId, product, quantity, lineTotal]
+
+    Cart:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CartItem"
+        subtotal:
+          type: number
+        deliveryFee:
+          type: number
+        total:
+          type: number
+        itemCount:
+          type: integer
+      required: [sessionId, items, subtotal, deliveryFee, total, itemCount]
+
+    AddCartItemBody:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        productId:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+      required: [sessionId, productId, quantity]
+
+    UpdateCartItemBody:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        quantity:
+          type: integer
+          minimum: 0
+      required: [sessionId, quantity]
+
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+        productName:
+          type: string
+        productImageUrl:
+          type: string
+        quantity:
+          type: integer
+        unitPrice:
+          type: number
+        lineTotal:
+          type: number
+      required: [id, productId, productName, productImageUrl, quantity, unitPrice, lineTotal]
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        orderNumber:
+          type: string
+        customerName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        state:
+          type: string
+        pincode:
+          type: string
+        paymentMethod:
+          type: string
+          description: e.g. "upi", "card", "cod"
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        subtotal:
+          type: number
+        deliveryFee:
+          type: number
+        total:
+          type: number
+        status:
+          type: string
+        estimatedDelivery:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - orderNumber
+        - customerName
+        - email
+        - phone
+        - addressLine1
+        - city
+        - state
+        - pincode
+        - paymentMethod
+        - items
+        - subtotal
+        - deliveryFee
+        - total
+        - status
+        - estimatedDelivery
+        - createdAt
+
+    CreateOrderBody:
+      type: object
+      properties:
+        sessionId:
+          type: string
+        customerName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        state:
+          type: string
+        pincode:
+          type: string
+        paymentMethod:
+          type: string
+      required:
+        - sessionId
+        - customerName
+        - email
+        - phone
+        - addressLine1
+        - city
+        - state
+        - pincode
+        - paymentMethod
+
+    SubscriptionPlan:
+      type: object
+      properties:
+        id:
+          type: string
+        slug:
+          type: string
+        name:
+          type: string
+        tagline:
+          type: string
+        description:
+          type: string
+        weeklyPrice:
+          type: number
+        boxesPerWeek:
+          type: integer
+        varieties:
+          type: array
+          items:
+            type: string
+        perks:
+          type: array
+          items:
+            type: string
+        imageUrl:
+          type: string
+      required: [id, slug, name, tagline, description, weeklyPrice, boxesPerWeek, varieties, perks, imageUrl]
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        planId:
+          type: string
+        customerName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        startDate:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+      required: [id, planId, customerName, email, phone, startDate, status, createdAt]
+
+    CreateSubscriptionBody:
+      type: object
+      properties:
+        planId:
+          type: string
+        customerName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+      required: [planId, customerName, email, phone]
+
+    StatsSummary:
+      type: object
+      properties:
+        varietiesCount:
+          type: integer
+        ordersToday:
+          type: integer
+        happyCustomers:
+          type: integer
+        averageDeliveryHours:
+          type: integer
+        farmsPartnered:
+          type: integer
+      required: [varietiesCount, ordersToday, happyCustomers, averageDeliveryHours, farmsPartnered]

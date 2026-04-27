@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Aamras — Premium Mangoes"
+version = "1.0.0"
+id = "artifacts/mango-shop"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25933
+
+[services.development]
+run = "pnpm --filter @workspace/mango-shop run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mango-shop", "run", "build" ]
+publicDir = "artifacts/mango-shop/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25933"
+BASE_PATH = "/"
