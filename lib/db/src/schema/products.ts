@@ -29,6 +29,8 @@ export const productsTable = pgTable("products", {
   isBestSeller: boolean("is_best_seller").notNull().default(false),
   isOrganic: boolean("is_organic").notNull().default(false),
   popularity: integer("popularity").notNull().default(0),
+  tags: text("tags").array().notNull().default([]),
+  isActive: boolean("is_active").notNull().default(true),
 });
 
 export type Product = typeof productsTable.$inferSelect;

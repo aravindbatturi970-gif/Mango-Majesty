@@ -4,8 +4,17 @@ import {
   productsTable,
   reviewsTable,
   subscriptionPlansTable,
+  adminUsersTable,
+  couponsTable,
   pool,
 } from "@workspace/db";
+import { scryptSync, randomBytes } from "node:crypto";
+
+function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const derived = scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${derived}`;
+}
 
 async function seed() {
   console.log("Clearing existing seed data...");
@@ -13,6 +22,8 @@ async function seed() {
   await db.delete(productsTable);
   await db.delete(categoriesTable);
   await db.delete(subscriptionPlansTable);
+  await db.delete(adminUsersTable);
+  await db.delete(couponsTable);
 
   console.log("Seeding categories...");
   await db.insert(categoriesTable).values([
@@ -380,11 +391,67 @@ async function seed() {
     },
   ]);
 
+  console.log("Seeding admin user...");
+  await db.insert(adminUsersTable).values([
+    {
+      email: "admin@aamras.com",
+      name: "Aamras Admin",
+      passwordHash: hashPassword("admin123"),
+      role: "super_admin",
+    },
+    {
+      email: "staff@aamras.com",
+      name: "Staff Member",
+      passwordHash: hashPassword("staff123"),
+      role: "staff",
+    },
+  ]);
+
+  console.log("Seeding coupons...");
+  const inOneMonth = new Date();
+  inOneMonth.setMonth(inOneMonth.getMonth() + 1);
+  await db.insert(couponsTable).values([
+    {
+      code: "MANGO10",
+      description: "10% off your first order",
+      discountType: "percent",
+      discountValue: "10",
+      minOrderValue: "499",
+      usageLimit: 500,
+      expiresAt: inOneMonth,
+      isActive: true,
+    },
+    {
+      code: "FREESHIP",
+      description: "Free delivery on orders above 599",
+      discountType: "fixed",
+      discountValue: "49",
+      minOrderValue: "599",
+      usageLimit: null,
+      expiresAt: inOneMonth,
+      isActive: true,
+    },
+    {
+      code: "ALPHONSO200",
+      description: "200 off Alphonso boxes",
+      discountType: "fixed",
+      discountValue: "200",
+      minOrderValue: "1299",
+      usageLimit: 100,
+      expiresAt: inOneMonth,
+      isActive: false,
+    },
+  ]);
+
   console.log("Done. Seeded:");
   console.log(`  - ${productSeeds.length} products`);
   console.log("  - 4 categories");
   console.log("  - 6 reviews");
   console.log("  - 3 subscription plans");
+  console.log("  - 2 admin users");
+  console.log("  - 3 coupons");
+  console.log("");
+  console.log("Admin login: admin@aamras.com / admin123");
 
   await pool.end();
 }
