@@ -14,6 +14,7 @@ import adminCustomersRouter from "./admin-customers";
 import adminCouponsRouter from "./admin-coupons";
 import adminAnalyticsRouter from "./admin-analytics";
 import adminNotificationsRouter from "./admin-notifications";
+import paymentsRouter from "./payments";
 
 const router: IRouter = Router();
 
@@ -25,6 +26,7 @@ router.use(cartRouter);
 router.use(ordersRouter);
 router.use(subscriptionsRouter);
 router.use(statsRouter);
+router.use(paymentsRouter);
 router.use(adminAuthRouter);
 router.use(adminProductsRouter);
 router.use(adminOrdersRouter);
