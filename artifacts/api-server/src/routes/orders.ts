@@ -126,4 +126,55 @@ router.get("/orders/:id", async (req, res): Promise<void> => {
   res.json(GetOrderResponse.parse(dto));
 });
 
+router.get("/orders/track/:orderNumber", async (req, res): Promise<void> => {
+  const orderNumber = req.params["orderNumber"]?.toUpperCase().trim();
+  if (!orderNumber) {
+    res.status(400).json({ error: "Order number required" });
+    return;
+  }
+  const [order] = await db
+    .select()
+    .from(ordersTable)
+    .where(eq(ordersTable.orderNumber, orderNumber))
+    .limit(1);
+  if (!order) {
+    res.status(404).json({ error: "Order not found. Please check the order number and try again." });
+    return;
+  }
+  const items = await db
+    .select()
+    .from(orderItemsTable)
+    .where(eq(orderItemsTable.orderId, order.id));
+
+  const maskEmail = (e: string) => {
+    const [name, domain] = e.split("@");
+    return `${name.slice(0, 2)}***@${domain}`;
+  };
+  const maskPhone = (p: string) =>
+    p.slice(0, 2) + "******" + p.slice(-2);
+
+  res.json({
+    orderNumber: order.orderNumber,
+    customerName: order.customerName.split(" ")[0] + " " + (order.customerName.split(" ")[1]?.[0] ?? "") + ".",
+    email: maskEmail(order.email),
+    phone: maskPhone(order.phone),
+    city: order.city,
+    state: order.state,
+    status: order.status,
+    paymentMethod: order.paymentMethod,
+    subtotal: Number(order.subtotal),
+    deliveryFee: Number(order.deliveryFee),
+    total: Number(order.total),
+    estimatedDelivery: order.estimatedDelivery.toISOString(),
+    createdAt: order.createdAt.toISOString(),
+    items: items.map((it) => ({
+      productName: it.productName,
+      productImageUrl: it.productImageUrl,
+      quantity: it.quantity,
+      unitPrice: Number(it.unitPrice),
+      lineTotal: Number(it.lineTotal),
+    })),
+  });
+});
+
 export default router;

@@ -90,10 +90,16 @@ export default function OrderConfirm({ params }: { params: { id: string } }) {
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 justify-center">
+          <Button asChild size="lg" className="rounded-full h-14">
+            <Link href={`/track?order=${order.orderNumber}`}>
+              <Truck className="w-5 h-5 mr-2" />
+              Track My Order
+            </Link>
+          </Button>
           <Button asChild size="lg" className="rounded-full h-14 bg-[#25D366] hover:bg-[#1DA851] text-white">
             <a href={`https://wa.me/919999999999?text=Hi,%20I%20want%20to%20track%20my%20order%20${order.orderNumber}`} target="_blank" rel="noopener noreferrer">
               <MessageCircle className="w-5 h-5 mr-2" />
-              Track on WhatsApp
+              WhatsApp
             </a>
           </Button>
           <Button asChild variant="outline" size="lg" className="rounded-full h-14">

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { Search, Mic, ShoppingBag, Menu } from "lucide-react";
+import { Search, Mic, ShoppingBag, Menu, Truck } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -104,6 +104,11 @@ export function Header() {
           >
             <Mic className="w-5 h-5" />
           </button>
+
+          <Link href="/track" className="hidden md:flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-2 py-1.5">
+            <Truck className="w-4 h-4" />
+            <span>Track Order</span>
+          </Link>
           
           <Link href="/cart" className="relative p-2 text-foreground hover:text-primary transition-colors hidden md:flex items-center gap-2">
             <div className="relative">

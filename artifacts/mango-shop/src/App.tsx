@@ -9,6 +9,7 @@ import ProductDetail from "@/pages/product";
 import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import OrderConfirm from "@/pages/order";
+import TrackOrder from "@/pages/track";
 import Subscribe from "@/pages/subscribe";
 import AdminLogin from "@/admin/pages/admin-login";
 import AdminDashboard from "@/admin/pages/admin-dashboard";
@@ -88,6 +89,7 @@ function Router() {
       <Route path="/cart" component={Cart} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/order/:id" component={OrderConfirm} />
+      <Route path="/track" component={TrackOrder} />
       <Route path="/subscribe" component={Subscribe} />
       <Route component={NotFound} />
     </Switch>
