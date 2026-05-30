@@ -22,6 +22,8 @@ export const ordersTable = pgTable("orders", {
   subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
   deliveryFee: numeric("delivery_fee", { precision: 10, scale: 2 }).notNull(),
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
+  couponCode: text("coupon_code"),
+  discountAmount: numeric("discount_amount", { precision: 10, scale: 2 }),
   status: text("status").notNull().default("confirmed"),
   estimatedDelivery: timestamp("estimated_delivery", { withTimezone: true })
     .notNull(),

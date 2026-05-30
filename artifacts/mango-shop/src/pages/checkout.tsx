@@ -18,6 +18,9 @@ import {
   Wallet,
   Banknote,
   AlertCircle,
+  Tag,
+  X,
+  CheckCircle2,
 } from "lucide-react";
 import {
   Form,
@@ -76,6 +79,15 @@ export default function Checkout() {
     keyId: string | null;
   } | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [couponInput, setCouponInput] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    description: string;
+    discountAmount: number;
+    finalAmount: number;
+  } | null>(null);
+  const [couponError, setCouponError] = useState("");
 
   useEffect(() => {
     fetch(`${import.meta.env.BASE_URL}api/payments/razorpay/config`, {
@@ -101,23 +113,56 @@ export default function Checkout() {
     },
   });
 
+  async function applyCoupon() {
+    if (!couponInput.trim() || !cart) return;
+    setCouponLoading(true);
+    setCouponError("");
+    setAppliedCoupon(null);
+    try {
+      const res = await fetch(
+        `${import.meta.env.BASE_URL}api/coupons/validate`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            code: couponInput.trim().toUpperCase(),
+            orderAmount: cart.total,
+          }),
+        },
+      );
+      const data = await res.json();
+      if (!res.ok) {
+        setCouponError(data.error ?? "Invalid coupon code");
+      } else {
+        setAppliedCoupon(data);
+        setCouponInput("");
+      }
+    } catch {
+      setCouponError("Could not validate coupon. Try again.");
+    } finally {
+      setCouponLoading(false);
+    }
+  }
+
   const paymentMethod = form.watch("paymentMethod");
   const onlinePaymentUnavailable =
     (paymentMethod === "upi" || paymentMethod === "card") &&
     razorpayConfig !== null &&
     !razorpayConfig.configured;
 
-  async function placeOrderInDb(
+  function placeOrderInDb(
     data: CheckoutFormValues,
-    razorpayPaymentId?: string,
+    couponCode?: string,
   ) {
-    const orderData: CreateOrderBody = {
+    const orderData: CreateOrderBody & { couponCode?: string } = {
       sessionId: getSessionId(),
       ...data,
+      ...(couponCode ? { couponCode } : {}),
     };
     return new Promise<string>((resolve, reject) => {
       createOrder.mutate(
-        { data: orderData },
+        { data: orderData as CreateOrderBody },
         {
           onSuccess: (order) => resolve(order.id),
           onError: (err) => reject(err),
@@ -135,13 +180,14 @@ export default function Checkout() {
 
     setIsProcessing(true);
     try {
+      const chargeAmount = appliedCoupon ? appliedCoupon.finalAmount : cart!.total;
       const createRes = await fetch(
         `${import.meta.env.BASE_URL}api/payments/razorpay/create-order`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ amount: cart!.total }),
+          body: JSON.stringify({ amount: chargeAmount }),
         },
       );
       const rzpOrder = await createRes.json();
@@ -191,7 +237,7 @@ export default function Checkout() {
                 reject(new Error("verification failed"));
                 return;
               }
-              const orderId = await placeOrderInDb(data, response.razorpay_payment_id);
+              const orderId = await placeOrderInDb(data, appliedCoupon?.code);
               resolve();
               setLocation(`/order/${orderId}`);
             } catch {
@@ -219,12 +265,13 @@ export default function Checkout() {
     if (!cart || cart.items.length === 0) return;
 
     if (data.paymentMethod === "cod") {
-      const orderData: CreateOrderBody = {
+      const orderData: CreateOrderBody & { couponCode?: string } = {
         sessionId: getSessionId(),
         ...data,
+        ...(appliedCoupon ? { couponCode: appliedCoupon.code } : {}),
       };
       createOrder.mutate(
-        { data: orderData },
+        { data: orderData as CreateOrderBody },
         { onSuccess: (order) => setLocation(`/order/${order.id}`) },
       );
       return;
@@ -528,6 +575,60 @@ export default function Checkout() {
                 ))}
               </div>
 
+              {/* Coupon input */}
+              <div className="mb-4">
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between rounded-xl bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/40 px-3 py-2.5">
+                    <div className="flex items-center gap-2 text-green-700 dark:text-green-400">
+                      <CheckCircle2 className="w-4 h-4 shrink-0" />
+                      <div>
+                        <div className="text-xs font-bold">{appliedCoupon.code} applied</div>
+                        <div className="text-xs opacity-80">{appliedCoupon.description}</div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setAppliedCoupon(null)}
+                      className="text-green-600 hover:text-green-800 dark:text-green-400 p-1"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <div className="flex gap-2">
+                      <div className="relative flex-1">
+                        <Tag className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <Input
+                          value={couponInput}
+                          onChange={(e) => {
+                            setCouponInput(e.target.value.toUpperCase());
+                            setCouponError("");
+                          }}
+                          onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), applyCoupon())}
+                          placeholder="Coupon code"
+                          className="pl-8 h-9 text-sm rounded-lg"
+                          autoCapitalize="characters"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-3 rounded-lg shrink-0"
+                        onClick={applyCoupon}
+                        disabled={couponLoading || !couponInput.trim()}
+                      >
+                        {couponLoading ? "..." : "Apply"}
+                      </Button>
+                    </div>
+                    {couponError && (
+                      <p className="text-xs text-destructive pl-1">{couponError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-2 text-sm border-t border-border pt-4 mb-4">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Subtotal</span>
@@ -539,9 +640,17 @@ export default function Checkout() {
                     {cart.deliveryFee === 0 ? "Free" : `₹${cart.deliveryFee}`}
                   </span>
                 </div>
+                {appliedCoupon && (
+                  <div className="flex justify-between text-green-700 dark:text-green-400 font-medium">
+                    <span>Discount ({appliedCoupon.code})</span>
+                    <span>−₹{appliedCoupon.discountAmount.toLocaleString("en-IN")}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-lg pt-2 mt-2 border-t border-border">
                   <span>Total to pay</span>
-                  <span className="text-primary">₹{cart.total}</span>
+                  <span className="text-primary">
+                    ₹{(appliedCoupon ? appliedCoupon.finalAmount : cart.total).toLocaleString("en-IN")}
+                  </span>
                 </div>
               </div>
 

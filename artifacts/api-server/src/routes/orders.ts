@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
-import { db, ordersTable, orderItemsTable } from "@workspace/db";
+import { db, ordersTable, orderItemsTable, couponsTable } from "@workspace/db";
 import {
   CreateOrderBody,
   GetOrderParams,
@@ -51,6 +51,8 @@ async function fetchOrderDto(orderId: string) {
     })),
     subtotal: Number(order.subtotal),
     deliveryFee: Number(order.deliveryFee),
+    discountAmount: order.discountAmount ? Number(order.discountAmount) : 0,
+    couponCode: order.couponCode ?? undefined,
     total: Number(order.total),
     status: order.status,
     estimatedDelivery: order.estimatedDelivery.toISOString(),
@@ -71,6 +73,40 @@ router.post("/orders", async (req, res): Promise<void> => {
     return;
   }
 
+  const couponCode = (req.body as Record<string, unknown>)["couponCode"];
+  let discountAmount = 0;
+  let appliedCouponCode: string | null = null;
+
+  if (couponCode && typeof couponCode === "string") {
+    const code = couponCode.toUpperCase().trim();
+    const [coupon] = await db
+      .select()
+      .from(couponsTable)
+      .where(eq(couponsTable.code, code))
+      .limit(1);
+
+    if (
+      coupon &&
+      coupon.isActive &&
+      (!coupon.expiresAt || coupon.expiresAt > new Date()) &&
+      (coupon.usageLimit === null || coupon.usageCount < coupon.usageLimit) &&
+      cart.total >= Number(coupon.minOrderValue)
+    ) {
+      const val = Number(coupon.discountValue);
+      discountAmount =
+        coupon.discountType === "percent"
+          ? Math.round((cart.total * val) / 100)
+          : Math.min(val, cart.total);
+      appliedCouponCode = code;
+
+      await db
+        .update(couponsTable)
+        .set({ usageCount: coupon.usageCount + 1 })
+        .where(eq(couponsTable.code, code));
+    }
+  }
+
+  const finalTotal = cart.total - discountAmount;
   const eta = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   const [order] = await db
@@ -88,7 +124,9 @@ router.post("/orders", async (req, res): Promise<void> => {
       paymentMethod: body.data.paymentMethod,
       subtotal: cart.subtotal.toFixed(2),
       deliveryFee: cart.deliveryFee.toFixed(2),
-      total: cart.total.toFixed(2),
+      couponCode: appliedCouponCode,
+      discountAmount: discountAmount > 0 ? discountAmount.toFixed(2) : null,
+      total: finalTotal.toFixed(2),
       status: "confirmed",
       estimatedDelivery: eta,
     })

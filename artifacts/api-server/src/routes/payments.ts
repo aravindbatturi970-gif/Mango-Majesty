@@ -1,5 +1,7 @@
 import { Router, type IRouter } from "express";
 import crypto from "crypto";
+import { eq } from "drizzle-orm";
+import { db, couponsTable } from "@workspace/db";
 
 const router: IRouter = Router();
 
@@ -8,6 +10,62 @@ function getRazorpay() {
   const keySecret = process.env["RAZORPAY_KEY_SECRET"];
   return { keyId, keySecret, configured: !!(keyId && keySecret) };
 }
+
+router.post("/coupons/validate", async (req, res): Promise<void> => {
+  const code = String(req.body?.code ?? "").toUpperCase().trim();
+  const orderAmount = Number(req.body?.orderAmount ?? 0);
+
+  if (!code) {
+    res.status(400).json({ error: "Coupon code is required" });
+    return;
+  }
+
+  const [coupon] = await db
+    .select()
+    .from(couponsTable)
+    .where(eq(couponsTable.code, code))
+    .limit(1);
+
+  if (!coupon || !coupon.isActive) {
+    res.status(404).json({ error: "Invalid or expired coupon code" });
+    return;
+  }
+
+  if (coupon.expiresAt && coupon.expiresAt < new Date()) {
+    res.status(400).json({ error: "This coupon has expired" });
+    return;
+  }
+
+  if (coupon.usageLimit !== null && coupon.usageCount >= coupon.usageLimit) {
+    res.status(400).json({ error: "This coupon has reached its usage limit" });
+    return;
+  }
+
+  const minOrder = Number(coupon.minOrderValue);
+  if (orderAmount < minOrder) {
+    res.status(400).json({
+      error: `Minimum order of ₹${minOrder.toLocaleString("en-IN")} required for this coupon`,
+    });
+    return;
+  }
+
+  const discountValue = Number(coupon.discountValue);
+  let discountAmount = 0;
+  if (coupon.discountType === "percent") {
+    discountAmount = Math.round((orderAmount * discountValue) / 100);
+  } else {
+    discountAmount = Math.min(discountValue, orderAmount);
+  }
+
+  res.json({
+    code: coupon.code,
+    description: coupon.description,
+    discountType: coupon.discountType,
+    discountValue,
+    discountAmount,
+    finalAmount: orderAmount - discountAmount,
+  });
+});
 
 router.get("/payments/razorpay/config", (_req, res): void => {
   const { keyId, configured } = getRazorpay();

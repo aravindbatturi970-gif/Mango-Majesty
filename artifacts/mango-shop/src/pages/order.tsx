@@ -82,6 +82,12 @@ export default function OrderConfirm({ params }: { params: { id: string } }) {
               <span>Delivery</span>
               <span>{order.deliveryFee === 0 ? "Free" : `₹${order.deliveryFee}`}</span>
             </div>
+            {(order as { discountAmount?: number; couponCode?: string }).discountAmount ? (
+              <div className="flex justify-between text-green-700 dark:text-green-400 font-medium">
+                <span>Discount {(order as { couponCode?: string }).couponCode ? `(${(order as { couponCode?: string }).couponCode})` : ""}</span>
+                <span>−₹{(order as { discountAmount?: number }).discountAmount}</span>
+              </div>
+            ) : null}
             <div className="flex items-center justify-between font-bold text-xl pt-2 mt-2 border-t border-border">
               <div className="flex items-center gap-2">
                 {order.paymentMethod === "cod" ? (
