@@ -1,6 +1,6 @@
 import { Layout } from "@/components/layout";
 import { useGetOrder } from "@workspace/api-client-react";
-import { CheckCircle2, MessageCircle, MapPin, Truck, Calendar } from "lucide-react";
+import { CheckCircle2, MessageCircle, MapPin, Truck, Calendar, Banknote, CreditCard, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
@@ -82,10 +82,26 @@ export default function OrderConfirm({ params }: { params: { id: string } }) {
               <span>Delivery</span>
               <span>{order.deliveryFee === 0 ? "Free" : `₹${order.deliveryFee}`}</span>
             </div>
-            <div className="flex justify-between font-bold text-xl pt-2 mt-2 border-t border-border">
-              <span>Total Paid ({order.paymentMethod.toUpperCase()})</span>
+            <div className="flex items-center justify-between font-bold text-xl pt-2 mt-2 border-t border-border">
+              <div className="flex items-center gap-2">
+                {order.paymentMethod === "cod" ? (
+                  <Banknote className="w-5 h-5 text-amber-600" />
+                ) : order.paymentMethod === "card" ? (
+                  <CreditCard className="w-5 h-5 text-primary" />
+                ) : (
+                  <Wallet className="w-5 h-5 text-primary" />
+                )}
+                <span>
+                  {order.paymentMethod === "cod" ? "Pay on Delivery" : "Total Paid"}
+                </span>
+              </div>
               <span className="text-primary">₹{order.total}</span>
             </div>
+            {order.paymentMethod === "cod" && (
+              <div className="mt-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 px-4 py-3 text-amber-800 dark:text-amber-400 text-xs font-medium">
+                Please keep ₹{order.total} ready to hand over to our delivery partner.
+              </div>
+            )}
           </div>
         </div>
 

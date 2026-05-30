@@ -174,8 +174,16 @@ export default function Checkout() {
                           <label className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${field.value === 'cod' ? 'border-primary bg-primary/5' : 'border-border hover:bg-muted'}`}>
                             <RadioGroupItem value="cod" id="payment-cod" />
                             <Banknote className={`w-5 h-5 ${field.value === 'cod' ? 'text-primary' : 'text-muted-foreground'}`} />
-                            <div className="flex-1 font-medium">Cash on Delivery</div>
+                            <div className="flex-1">
+                              <div className="font-medium">Cash on Delivery</div>
+                              <div className="text-xs text-muted-foreground">Pay when your order arrives</div>
+                            </div>
                           </label>
+                          {field.value === "cod" && (
+                            <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 px-4 py-3 text-amber-800 dark:text-amber-400 text-xs font-medium">
+                              Please keep exact change ready for the delivery partner.
+                            </div>
+                          )}
                         </RadioGroup>
                       </FormControl>
                     </FormItem>
@@ -227,7 +235,11 @@ export default function Checkout() {
                 className="w-full rounded-full h-14 text-lg shadow-lg"
                 disabled={createOrder.isPending}
               >
-                {createOrder.isPending ? "Processing..." : `Pay ₹${cart.total}`}
+                {createOrder.isPending
+                  ? "Placing Order..."
+                  : form.watch("paymentMethod") === "cod"
+                  ? `Place Order — ₹${cart.total} on Delivery`
+                  : `Pay ₹${cart.total}`}
               </Button>
             </div>
 
