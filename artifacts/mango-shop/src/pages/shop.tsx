@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useListProducts, useListCategories } from "@workspace/api-client-react";
 import { Layout } from "@/components/layout";
@@ -14,10 +14,27 @@ interface ShopProps {
   };
 }
 
+function getQueryParam(key: string): string {
+  if (typeof window === "undefined") return "";
+  return new URLSearchParams(window.location.search).get(key) ?? "";
+}
+
 export default function Shop({ params }: ShopProps) {
-  const [search, setSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
-  
+  const [location] = useLocation();
+  const initialQ = getQueryParam("q");
+  const [search, setSearch] = useState(initialQ);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialQ);
+  const prevLocation = useRef(location);
+
+  useEffect(() => {
+    if (location !== prevLocation.current) {
+      prevLocation.current = location;
+      const q = getQueryParam("q");
+      setSearch(q);
+      setDebouncedSearch(q);
+    }
+  }, [location]);
+
   const categorySlug = params?.slug;
 
   const { data: products, isLoading: isLoadingProducts } = useListProducts({

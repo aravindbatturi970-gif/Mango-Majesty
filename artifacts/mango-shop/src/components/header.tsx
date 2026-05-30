@@ -1,4 +1,5 @@
-import { Link } from "wouter";
+import { useState } from "react";
+import { Link, useLocation } from "wouter";
 import { Search, Mic, ShoppingBag, Menu } from "lucide-react";
 import { useCart } from "@/hooks/use-cart";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,18 @@ import { toast } from "sonner";
 export function Header() {
   const { cart } = useCart();
   const itemCount = cart?.itemCount || 0;
+  const [query, setQuery] = useState("");
+  const [, navigate] = useLocation();
+
+  function submitSearch(q: string) {
+    const trimmed = q.trim();
+    if (!trimmed) return;
+    navigate(`/shop?q=${encodeURIComponent(trimmed)}`);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") submitSearch(query);
+  }
 
   const handleVoiceSearch = () => {
     toast("Listening...", {
@@ -29,9 +42,15 @@ export function Header() {
         </div>
 
         <div className="flex-1 max-w-md hidden md:flex items-center relative">
-          <Search className="w-4 h-4 absolute left-3 text-muted-foreground" />
+          <Search
+            className="w-4 h-4 absolute left-3 text-muted-foreground cursor-pointer"
+            onClick={() => submitSearch(query)}
+          />
           <input
             type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Search mangoes..."
             className="w-full bg-muted border-none rounded-full pl-10 pr-10 py-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           />
@@ -65,12 +84,15 @@ export function Header() {
         </div>
       </div>
       
-      {/* Mobile Search Bar - below header */}
+      {/* Mobile Search Bar */}
       <div className="md:hidden px-4 pb-3">
         <div className="relative">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Search for Alphonso..."
             className="w-full bg-muted border-none rounded-full pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
           />
