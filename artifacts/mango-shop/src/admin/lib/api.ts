@@ -74,6 +74,20 @@ export const adminApi = {
 
   analytics: () => request<AdminAnalytics>("/admin/analytics/overview"),
 
+  notifications: () =>
+    request<{
+      items: {
+        id: string;
+        type: "order" | "stock";
+        title: string;
+        body: string;
+        href: string;
+        imageUrl?: string;
+        createdAt: string;
+      }[];
+      unread: number;
+    }>("/admin/notifications"),
+
   updateProfile: (body: { name: string; email: string }) =>
     request<{ admin: AdminMe }>("/admin/profile", {
       method: "PUT",

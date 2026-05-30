@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation, useRouter } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard,
   Package,
@@ -16,6 +17,9 @@ import {
   Menu,
   ChevronLeft,
   Leaf,
+  AlertTriangle,
+  PackageOpen,
+  ShoppingCart as ShoppingCartIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAdminLogout, useAdminMe } from "../lib/use-admin";
+import { adminApi } from "../lib/api";
 import {
   applyAdminTheme,
   getInitialAdminTheme,
@@ -53,6 +58,88 @@ const NAV: NavItem[] = [
 function useBasePath() {
   const router = useRouter();
   return router.base ?? "";
+}
+
+function NotificationBell({ withBase }: { withBase: (href: string) => string }) {
+  const { data } = useQuery({
+    queryKey: ["admin", "notifications"],
+    queryFn: () => adminApi.notifications(),
+    refetchInterval: 60_000,
+    retry: false,
+  });
+
+  const items = data?.items ?? [];
+  const unread = data?.unread ?? 0;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-9 w-9 relative"
+          data-testid="button-notifications"
+        >
+          <Bell className="w-4 h-4" />
+          {unread > 0 && (
+            <span className="absolute top-1.5 right-1.5 min-w-[14px] h-[14px] rounded-full bg-amber-500 text-[9px] font-bold text-white flex items-center justify-center px-0.5">
+              {unread > 9 ? "9+" : unread}
+            </span>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80 max-h-[420px] overflow-y-auto">
+        <DropdownMenuLabel className="flex items-center justify-between">
+          <span>Notifications</span>
+          {unread > 0 && (
+            <span className="text-[10px] font-semibold bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full">
+              {unread} new
+            </span>
+          )}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {items.length === 0 ? (
+          <div className="py-6 text-center text-sm text-slate-400">
+            All caught up — no alerts.
+          </div>
+        ) : (
+          items.map((item) => (
+            <DropdownMenuItem key={item.id} asChild>
+              <Link href={withBase(item.href)}>
+                <a className="flex items-start gap-3 w-full cursor-pointer py-2">
+                  <span className={`mt-0.5 grid place-items-center w-7 h-7 rounded-lg shrink-0 ${
+                    item.type === "order"
+                      ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600"
+                      : "bg-amber-50 dark:bg-amber-950/40 text-amber-600"
+                  }`}>
+                    {item.type === "order"
+                      ? <ShoppingCartIcon className="w-3.5 h-3.5" />
+                      : <PackageOpen className="w-3.5 h-3.5" />}
+                  </span>
+                  <div className="min-w-0">
+                    <div className="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">
+                      {item.title}
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      {item.body}
+                    </div>
+                  </div>
+                </a>
+              </Link>
+            </DropdownMenuItem>
+          ))
+        )}
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href={withBase("/admin/orders")}>
+            <a className="text-xs text-center w-full text-emerald-600 dark:text-emerald-400 font-medium">
+              View all orders
+            </a>
+          </Link>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 export function AdminLayout({ children }: { children: ReactNode }) {
@@ -188,15 +275,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
             >
               {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 relative"
-              data-testid="button-notifications"
-            >
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-500" />
-            </Button>
+            <NotificationBell withBase={withBase} />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button

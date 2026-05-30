@@ -17,6 +17,7 @@ import {
   ArrowUpRight,
   Package,
   CreditCard,
+  Bell,
 } from "lucide-react";
 import { adminApi, formatINR } from "../lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -60,6 +61,18 @@ export default function AdminDashboard() {
     queryKey: ["admin", "analytics"],
     queryFn: () => adminApi.analytics(),
   });
+  const { data: notifData } = useQuery({
+    queryKey: ["admin", "notifications"],
+    queryFn: () => adminApi.notifications(),
+    refetchInterval: 60_000,
+    retry: false,
+  });
+  const criticalStock = (notifData?.items ?? []).filter(
+    (n) => n.type === "stock",
+  );
+  const pendingOrders = (notifData?.items ?? []).filter(
+    (n) => n.type === "order",
+  );
 
   if (isLoading || !data) {
     return (
@@ -85,6 +98,37 @@ export default function AdminDashboard() {
           </p>
         </div>
       </div>
+
+      {(criticalStock.length > 0 || pendingOrders.length > 0) && (
+        <div className="flex flex-col gap-2">
+          {pendingOrders.length > 0 && (
+            <Link href={`${base}/admin/orders`}>
+              <a className="flex items-center gap-3 rounded-xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/30 px-4 py-3 hover:bg-emerald-100 dark:hover:bg-emerald-950/50 transition-colors cursor-pointer">
+                <Bell className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <span className="text-sm font-medium text-emerald-800 dark:text-emerald-300">
+                  {pendingOrders.length} order{pendingOrders.length > 1 ? "s" : ""} waiting to be processed
+                </span>
+                <span className="ml-auto text-xs text-emerald-600 dark:text-emerald-400 font-medium">
+                  View orders →
+                </span>
+              </a>
+            </Link>
+          )}
+          {criticalStock.length > 0 && (
+            <Link href={`${base}/admin/products`}>
+              <a className="flex items-center gap-3 rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-950/30 px-4 py-3 hover:bg-amber-100 dark:hover:bg-amber-950/50 transition-colors cursor-pointer">
+                <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                  {criticalStock.length} product{criticalStock.length > 1 ? "s" : ""} running low on stock
+                </span>
+                <span className="ml-auto text-xs text-amber-600 dark:text-amber-400 font-medium">
+                  Update stock →
+                </span>
+              </a>
+            </Link>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard

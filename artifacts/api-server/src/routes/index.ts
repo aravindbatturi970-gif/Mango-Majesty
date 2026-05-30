@@ -13,6 +13,7 @@ import adminOrdersRouter from "./admin-orders";
 import adminCustomersRouter from "./admin-customers";
 import adminCouponsRouter from "./admin-coupons";
 import adminAnalyticsRouter from "./admin-analytics";
+import adminNotificationsRouter from "./admin-notifications";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(adminOrdersRouter);
 router.use(adminCustomersRouter);
 router.use(adminCouponsRouter);
 router.use(adminAnalyticsRouter);
+router.use(adminNotificationsRouter);
 
 export default router;
