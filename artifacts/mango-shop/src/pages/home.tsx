@@ -108,6 +108,37 @@ export default function Home() {
         </div>
       </section>
 
+      {/* All Products / New Arrivals */}
+      <section className="py-16 md:py-24 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-serif font-bold text-foreground mb-2">Fresh from the Farm</h2>
+              <p className="text-muted-foreground">Every variety we carry, available now.</p>
+            </div>
+            <Link href="/shop" className="hidden md:flex items-center gap-1 text-primary font-medium hover:underline">
+              View all <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+
+          {isLoadingProducts ? (
+            <ProductGridSkeleton count={8} />
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {products?.slice(0, 8).map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          )}
+
+          <div className="mt-8 text-center">
+            <Button asChild variant="outline" className="rounded-full px-8">
+              <Link href="/shop">Browse all mangoes</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
       {/* Subscription Teaser */}
       <section className="py-16 md:py-24 bg-primary text-primary-foreground relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('/images/organic-box.png')] bg-cover bg-center mix-blend-overlay"></div>

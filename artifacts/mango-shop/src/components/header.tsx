@@ -22,11 +22,46 @@ export function Header() {
   }
 
   const handleVoiceSearch = () => {
+    const SpeechRecognition =
+      (window as typeof window & { SpeechRecognition?: typeof webkitSpeechRecognition }).SpeechRecognition ??
+      (window as typeof window & { webkitSpeechRecognition?: typeof webkitSpeechRecognition }).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast.error("Voice search is not supported in this browser. Try Chrome.");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
     toast("Listening...", {
-      description: "Say 'Find Alphonso mangoes'",
+      description: "Speak now — say a mango name or variety",
       icon: <Mic className="w-4 h-4 text-primary" />,
-      duration: 3000,
+      duration: 5000,
+      id: "voice-search",
     });
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0]?.[0]?.transcript ?? "";
+      toast.dismiss("voice-search");
+      if (transcript) {
+        setQuery(transcript);
+        navigate(`/shop?q=${encodeURIComponent(transcript)}`);
+      }
+    };
+
+    recognition.onerror = () => {
+      toast.dismiss("voice-search");
+      toast.error("Couldn't hear anything. Please try again.");
+    };
+
+    recognition.onend = () => {
+      toast.dismiss("voice-search");
+    };
+
+    recognition.start();
   };
 
   return (

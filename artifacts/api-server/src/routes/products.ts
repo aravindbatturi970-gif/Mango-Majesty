@@ -45,7 +45,7 @@ router.get("/products", async (req, res): Promise<void> => {
     return;
   }
 
-  const filters = [];
+  const filters = [eq(productsTable.isActive, true)];
   if (params.data.category) {
     filters.push(eq(productsTable.categorySlug, params.data.category));
   }
@@ -74,7 +74,7 @@ router.get("/products/best-sellers", async (_req, res): Promise<void> => {
   const rows = await db
     .select()
     .from(productsTable)
-    .where(eq(productsTable.isBestSeller, true))
+    .where(and(eq(productsTable.isBestSeller, true), eq(productsTable.isActive, true)))
     .orderBy(desc(productsTable.popularity))
     .limit(8);
 
