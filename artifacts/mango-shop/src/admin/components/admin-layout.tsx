@@ -7,6 +7,7 @@ import {
   Users,
   Ticket,
   BarChart3,
+  Settings,
   Bell,
   Search,
   Moon,
@@ -46,6 +47,7 @@ const NAV: NavItem[] = [
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/coupons", label: "Coupons", icon: Ticket },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 function useBasePath() {
@@ -218,6 +220,15 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">
                 <DropdownMenuLabel>{data?.admin?.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href={withBase("/admin/settings")}>
+                    <a className="flex items-center w-full">
+                      <Settings className="w-4 h-4 mr-2" />
+                      Settings
+                    </a>
+                  </Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => logout.mutate()}

@@ -17,6 +17,7 @@ import AdminOrders from "@/admin/pages/admin-orders";
 import AdminCustomers from "@/admin/pages/admin-customers";
 import AdminCoupons from "@/admin/pages/admin-coupons";
 import AdminAnalytics from "@/admin/pages/admin-analytics";
+import AdminSettings from "@/admin/pages/admin-settings";
 import { AdminLayout } from "@/admin/components/admin-layout";
 import { AdminGuard } from "@/admin/components/admin-guard";
 import { useEffect } from "react";
@@ -73,6 +74,11 @@ function Router() {
       <Route path="/admin/analytics">
         <ProtectedAdmin>
           <AdminAnalytics />
+        </ProtectedAdmin>
+      </Route>
+      <Route path="/admin/settings">
+        <ProtectedAdmin>
+          <AdminSettings />
         </ProtectedAdmin>
       </Route>
       <Route path="/" component={Home} />

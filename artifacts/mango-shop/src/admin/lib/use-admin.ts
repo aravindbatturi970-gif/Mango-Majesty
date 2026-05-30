@@ -32,6 +32,24 @@ export function useAdminLogin() {
   });
 }
 
+export function useUpdateProfile() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { name: string; email: string }) =>
+      adminApi.updateProfile(body),
+    onSuccess: (data) => {
+      qc.setQueryData(ADMIN_ME_KEY, data);
+    },
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: (body: { currentPassword: string; newPassword: string }) =>
+      adminApi.changePassword(body),
+  });
+}
+
 export function useAdminLogout() {
   const qc = useQueryClient();
   const [, setLocation] = useLocation();

@@ -73,6 +73,17 @@ export const adminApi = {
     request<{ ok: true }>(`/admin/coupons/${id}`, { method: "DELETE" }),
 
   analytics: () => request<AdminAnalytics>("/admin/analytics/overview"),
+
+  updateProfile: (body: { name: string; email: string }) =>
+    request<{ admin: AdminMe }>("/admin/profile", {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
+  changePassword: (body: { currentPassword: string; newPassword: string }) =>
+    request<{ ok: true }>("/admin/password", {
+      method: "PUT",
+      body: JSON.stringify(body),
+    }),
 };
 
 export type AdminMe = {
