@@ -18,7 +18,7 @@ export function BottomNav() {
   const itemCount = cart?.itemCount || 0;
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 pb-safe pointer-events-none">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 px-3 pb-3 pb-safe pointer-events-none">
       <div className="relative pointer-events-auto">
         {/* Nav bar */}
         <div className="bg-white/95 backdrop-blur-xl rounded-[28px] shadow-[0_4px_32px_rgba(0,0,0,0.12)] border border-gray-100 flex items-center justify-around px-2 py-1.5 pr-16">
