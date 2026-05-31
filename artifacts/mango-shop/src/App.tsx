@@ -11,6 +11,8 @@ import Checkout from "@/pages/checkout";
 import OrderConfirm from "@/pages/order";
 import TrackOrder from "@/pages/track";
 import Subscribe from "@/pages/subscribe";
+import Profile from "@/pages/profile";
+import Help from "@/pages/help";
 import AdminLogin from "@/admin/pages/admin-login";
 import AdminDashboard from "@/admin/pages/admin-dashboard";
 import AdminProducts from "@/admin/pages/admin-products";
@@ -21,6 +23,8 @@ import AdminAnalytics from "@/admin/pages/admin-analytics";
 import AdminSettings from "@/admin/pages/admin-settings";
 import { AdminLayout } from "@/admin/components/admin-layout";
 import { AdminGuard } from "@/admin/components/admin-guard";
+import { UserAuthProvider } from "@/contexts/user-auth";
+import { LoginModal } from "@/components/login-modal";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
@@ -91,6 +95,8 @@ function Router() {
       <Route path="/order/:id" component={OrderConfirm} />
       <Route path="/track" component={TrackOrder} />
       <Route path="/subscribe" component={Subscribe} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/help" component={Help} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -100,11 +106,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <ResetThemeOnExit />
-          <Router />
-        </WouterRouter>
-        <Toaster position="bottom-center" />
+        <UserAuthProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <ResetThemeOnExit />
+            <Router />
+            <LoginModal />
+          </WouterRouter>
+          <Toaster position="bottom-center" />
+        </UserAuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

@@ -60,6 +60,38 @@ async function fetchOrderDto(orderId: string) {
   };
 }
 
+router.get("/orders/by-phone", async (req, res): Promise<void> => {
+  const phone = typeof req.query["phone"] === "string" ? req.query["phone"].replace(/\D/g, "") : "";
+  if (!phone || phone.length < 10) {
+    res.status(400).json({ error: "Invalid phone number" });
+    return;
+  }
+  const orders = await db
+    .select()
+    .from(ordersTable)
+    .where(eq(ordersTable.phone, phone))
+    .orderBy(ordersTable.createdAt);
+
+  const result = await Promise.all(
+    orders.map(async (order) => {
+      const items = await db
+        .select()
+        .from(orderItemsTable)
+        .where(eq(orderItemsTable.orderId, order.id));
+      return {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        status: order.status,
+        total: Number(order.total),
+        createdAt: order.createdAt.toISOString(),
+        items: items.map((i) => ({ productName: i.productName, quantity: i.quantity })),
+      };
+    }),
+  );
+
+  res.json(result);
+});
+
 router.post("/orders", async (req, res): Promise<void> => {
   const body = CreateOrderBody.safeParse(req.body);
   if (!body.success) {
