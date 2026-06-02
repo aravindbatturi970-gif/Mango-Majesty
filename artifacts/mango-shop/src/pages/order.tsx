@@ -29,7 +29,7 @@ export default function OrderConfirm({ params }: { params: { id: string } }) {
             Order Confirmed!
           </h1>
           <p className="text-muted-foreground text-lg mb-2">
-            Thank you for shopping with Aamras, {order.customerName.split(' ')[0]}.
+            Thank you for shopping with Village Organic Mangos, {order.customerName.split(' ')[0]}.
           </p>
           <p className="font-medium px-4 py-2 bg-muted inline-block rounded-full mb-8">
             Order #{order.orderNumber}

@@ -91,7 +91,7 @@ export function LoginModal() {
               {/* Logo + title */}
               <div className="text-center mb-8">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-50 border-2 border-amber-200 mb-4">
-                  <span className="text-3xl">🥭</span>
+                  <span className="text-3xl">🌿</span>
                 </div>
                 <h2 className="text-xl font-extrabold text-amber-600 tracking-widest uppercase">
                   {step === "phone" ? "Login" : "Your Name"}

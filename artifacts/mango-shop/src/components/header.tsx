@@ -72,7 +72,7 @@ export function Header() {
             <Menu className="w-5 h-5" />
           </Button>
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-2xl font-serif font-bold text-primary">Aamras</span>
+            <span className="text-2xl font-serif font-bold text-primary">Village Organic Mangos</span>
           </Link>
         </div>
 

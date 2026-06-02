@@ -110,7 +110,7 @@ export default function Help() {
             </div>
           </a>
           <a
-            href="mailto:support@aamras.com"
+            href="mailto:support@villageorganicmangos.com"
             className="flex items-center gap-3 bg-white rounded-xl p-3.5 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
@@ -118,7 +118,7 @@ export default function Help() {
             </div>
             <div>
               <div className="text-xs font-semibold text-gray-800">Email Us</div>
-              <div className="text-xs text-gray-500">support@aamras.com</div>
+              <div className="text-xs text-gray-500">support@villageorganicmangos.com</div>
             </div>
           </a>
           <a

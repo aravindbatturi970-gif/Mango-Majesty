@@ -53,7 +53,7 @@ export default function Subscribe() {
         <div className="absolute inset-0 opacity-20 bg-[url('/images/organic-box.png')] bg-cover bg-center mix-blend-overlay"></div>
         <div className="container mx-auto px-4 relative z-10 text-center max-w-3xl">
           <span className="inline-block bg-background text-primary px-3 py-1 rounded-full text-sm font-bold mb-6">
-            Aamras Club
+            Village Organic Mangos Club
           </span>
           <h1 className="text-4xl md:text-6xl font-serif font-bold mb-6">A summer without limits.</h1>
           <p className="text-lg md:text-xl text-primary-foreground/90">

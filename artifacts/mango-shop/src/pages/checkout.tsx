@@ -201,7 +201,7 @@ export default function Checkout() {
           key: rzpOrder.keyId,
           amount: rzpOrder.amount,
           currency: rzpOrder.currency,
-          name: "Aamras",
+          name: "Village Organic Mangos",
           description: "Premium Mango Order",
           image: `${import.meta.env.BASE_URL}favicon.ico`,
           order_id: rzpOrder.razorpayOrderId,

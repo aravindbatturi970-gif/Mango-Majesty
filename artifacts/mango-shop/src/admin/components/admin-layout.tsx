@@ -192,7 +192,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               <span className="grid place-items-center w-8 h-8 rounded-lg bg-emerald-600 text-white shadow-sm">
                 <Leaf className="w-4 h-4" />
               </span>
-              {!collapsed && <span className="text-base">Aamras Admin</span>}
+              {!collapsed && <span className="text-base">Village Organic Mangos Admin</span>}
             </a>
           </Link>
           <Button

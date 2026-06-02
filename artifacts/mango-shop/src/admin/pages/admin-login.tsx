@@ -27,7 +27,7 @@ export default function AdminLogin() {
             <Leaf className="w-5 h-5" />
           </span>
           <div>
-            <div className="text-lg font-semibold tracking-tight">Aamras</div>
+            <div className="text-lg font-semibold tracking-tight">Village Organic Mangos</div>
             <div className="text-xs text-slate-500 -mt-0.5">Admin Console</div>
           </div>
         </div>

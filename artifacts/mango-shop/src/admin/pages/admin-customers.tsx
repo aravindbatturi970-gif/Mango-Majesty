@@ -30,7 +30,7 @@ export default function AdminCustomers() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Customers</h1>
         <p className="text-sm text-slate-500 mt-1">
-          Everyone who's ordered from Aamras.
+          Everyone who's ordered from Village Organic Mangos.
         </p>
       </div>
 
